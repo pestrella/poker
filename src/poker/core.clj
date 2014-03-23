@@ -54,11 +54,32 @@
                          (conj right (first left)))
                   right))))))
 
-(straight? '({:suit :clubs :pip 6}
+(defn straight-flush? [hand]
+  (and (flush? hand) (straight? hand)))
+
+(def hand-types [{:type straight-flush? :score 8}
+                 {:type four-of-a-kind? :score 7}
+                 {:type full-house? :score 6}
+                 {:type flush? :score 5}
+                 {:type straight? :score 4}
+                 {:type triple? :score 3}
+                 {:type two-pair? :score 2}
+                 {:type pair? :score 1}])
+
+(defn score [hand]
+  (loop [types hand-types]
+    (let [type (first types)]
+      (if type
+        (if ((:type type) hand)
+          (:score type)
+          (recur (rest types)))
+        0))))
+
+(score '({:suit :clubs :pip 6}
          {:suit :clubs :pip 8}
          {:suit :clubs :pip 9}
          {:suit :clubs :pip 7}
-         {:suit :clubs :pip 5}))
+         {:suit :hearts :pip 5}))
 
 (defn play []
   (let [hand (deal deck)]
