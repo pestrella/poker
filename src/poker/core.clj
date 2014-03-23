@@ -22,13 +22,6 @@
        (filter #(= n (val %))
                (frequencies (map :pip hand)))))
 
-(defn n-same-suits
-  "Returns the suit of any n same suits"
-  [n hand]
-  (map #(get % 0)
-       (filter #(= n (val %))
-               (frequencies (map :suit hand)))))
-
 (defn count-pairs [hand]
   (count (n-same-pips 2 hand)))
 
@@ -48,14 +41,24 @@
   (and (pair? hand) (triple? hand)))
 
 (defn flush? [hand]
-  (let [n (count hand)]
-    (= 1 (count (n-same-suits n hand)))))
+  (let [suit (:suit (first hand))]
+    (every? #(= suit (:suit %)) (rest hand))))
 
-(flush? '({:suit :clubs :pip 6}
+(defn straight? [hand]
+  (let [pips (sort (map :pip hand))]
+    (= (count hand)
+       (count (loop [left (rest pips)
+                     right [(first pips)]]
+                (if (= (first left) (+ 1 (last right)))
+                  (recur (rest left)
+                         (conj right (first left)))
+                  right))))))
+
+(straight? '({:suit :clubs :pip 6}
          {:suit :clubs :pip 8}
          {:suit :clubs :pip 9}
-         {:suit :clubs :pip 2}
-         {:suit :hearts :pip 11}))
+         {:suit :clubs :pip 7}
+         {:suit :clubs :pip 5}))
 
 (defn play []
   (let [hand (deal deck)]
